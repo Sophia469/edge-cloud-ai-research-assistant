@@ -338,6 +338,22 @@ async def home():
         button { width: 100%; height: 46px; }
         .user, .assistant { margin-left: 0; margin-right: 0; }
     }
+@media (max-width: 600px) {
+    .page { max-width: 100%; padding: 22px 14px 42px; }
+    .header { margin-bottom: 20px; padding: 0 8px; }
+    .brandline { font-size: 11px; letter-spacing: .10em; margin-bottom: 12px; }
+    .header h1 { font-size: 27px; line-height: 1.15; margin-bottom: 12px; }
+    .header p { font-size: 15px; line-height: 1.45; margin: 0 auto; max-width: 92%; }
+    .creator { margin-top: 14px; font-size: 13px; line-height: 1.45; }
+    .topics-intro { margin: 24px 0 16px; font-size: 14px; }
+    .card { padding: 12px; border-radius: 14px; }
+    #messages { min-height: 0; max-height: none; overflow-y: visible; margin-bottom: 14px; }
+    .message { width: 100%; box-sizing: border-box; padding: 14px; line-height: 1.55; }
+    .user, .assistant { margin-left: 0; margin-right: 0; }
+    .input-row { flex-direction: column; gap: 10px; }
+    textarea { width: 100%; box-sizing: border-box; }
+    button { width: 100%; height: 46px; }
+}
 </style>
 </head>
 <body>
@@ -556,6 +572,7 @@ question.addEventListener("keydown", function(event) {
 </body>
 </html>
 """
+
 
 
 
