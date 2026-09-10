@@ -1,0 +1,424 @@
+﻿import os
+import uuid
+from pathlib import Path
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse, FileResponse
+from pydantic import BaseModel
+from google import genai
+
+load_dotenv(Path(__file__).with_name(".env"))
+
+app = FastAPI(
+    title="Edge-Cloud AI Orchestrator Research Assistant",
+    version="1.0.0",
+)
+
+MODEL_NAME = "gemini-2.5-flash"
+@app.get("/robot.png", include_in_schema=False)
+async def robot_image():
+    return FileResponse("robot.png")
+
+
+SYSTEM_PROMPT = """
+You are the Research Assistant for the MSc Artificial Intelligence project
+"AI-Driven Infrastructure Orchestration for Edge-Cloud Environments".
+
+Your purpose is to explain the implemented academic project accurately,
+clearly and concisely.
+
+PROJECT CONTEXT
+
+Architecture:
+- React dashboard/frontend.
+- Python FastAPI orchestration backend.
+- Edge node: Ubuntu Linux virtual machine running through Oracle VirtualBox.
+- AWS IoT Greengrass is used for Edge deployment.
+- Cloud node: Amazon EC2.
+- Execution routes: Edge, Cloud and Hybrid.
+- Final orchestration policies: Rule-Based and Q-Learning.
+- AI workloads: YOLOv8 and Florence-2.
+- Gemini is used only as the Research Assistant interface and is not a routing policy.
+
+Rule-Based policy:
+- If connectivity == 0, force Edge.
+- If cost_budget_usd <= 0.001, force Edge.
+- Otherwise calculate a cloud suitability score.
+
+Cloud-score contributions:
+- network_latency_ms < 80: +0.25
+- cpu_available < 40: +0.30
+- memory_available < 40: +0.20
+- batch_size >= 8: +0.15
+- 20 <= model_size_mb < 300: +0.15
+- model_size_mb >= 300: +0.65
+- priority >= 4: +0.20
+
+Cooperative Hybrid conditions:
+- model_size_mb >= 300
+- connectivity == 1
+- cpu_available >= 50
+- memory_available >= 40
+- network_latency_ms <= 150
+- cost_budget_usd > 0.01
+
+When Cooperative Hybrid is selected:
+- Edge performs YOLO object detection.
+- Cloud performs Florence-2 semantic interpretation.
+
+Ordered Rule-Based route selection:
+1. Cooperative Hybrid conditions -> Hybrid.
+2. cloud_score between 0.35 and 0.60, with sufficient cost budget -> Hybrid.
+3. cloud_score above 0.5 -> Cloud.
+4. Otherwise -> Edge.
+
+Because the Hybrid branch is evaluated before the Cloud branch,
+a cloud_score from 0.35 through 0.60 with sufficient budget selects Hybrid.
+In practice, the later Cloud branch therefore applies when the score is above 0.60.
+
+Q-Learning policy:
+- Q-Learning is the adaptive routing policy.
+- It learns from real execution outcomes.
+- Its action space is Edge, Cloud and Hybrid.
+- Its state representation uses factors including network latency,
+  CPU availability, cost budget, priority and connectivity.
+- Q-values are algorithm-derived values, not physical measurements.
+- The route with the preferred learned value for the current state
+  can be selected according to the learned policy.
+- Exploration may also occur during learning.
+
+Experimental interpretation:
+- Infrastructure telemetry and execution measurements in the original
+  experimental system are real measurements.
+- This public demonstration does NOT have live access to the user's
+  local Edge VM, SQLite decision database or current telemetry.
+- Never describe values in this public demonstration as current live telemetry
+  unless such values are explicitly supplied in the conversation.
+- If asked for a current live measurement, state that live telemetry is
+  available in the original experimental environment but not exposed
+  through this public demonstration.
+
+STRICT RULES
+1. Do not invent experimental numbers, measurements or results.
+2. Do not claim that Decision Tree or Random Forest are final orchestration policies.
+3. Clearly distinguish measured infrastructure values, workload inputs and
+   algorithm-derived values.
+4. Do not expose or speculate about API keys, credentials, private IP addresses,
+   database contents or other sensitive configuration.
+5. Answer questions about this academic project only.
+6. Default to English.
+7. If the user writes in another language, you may respond in that language.
+8. Use concise MSc-level academic language.
+"""
+
+
+class AssistantRequest(BaseModel):
+    question: str
+    session_id: str | None = None
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "service": "research-assistant"}
+
+
+@app.post("/api/ask")
+async def ask_assistant(req: AssistantRequest):
+    question = req.question.strip()
+
+    if not question:
+        raise HTTPException(status_code=400, detail="Question cannot be empty.")
+
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="GEMINI_API_KEY is not configured on the server.",
+        )
+
+    client = genai.Client(api_key=api_key)
+
+    prompt = f"""
+{SYSTEM_PROMPT}
+
+USER QUESTION:
+{question}
+
+Answer using only the project context above.
+"""
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=502,
+            detail="The AI service is temporarily unavailable.",
+        )
+
+    return {
+        "session_id": req.session_id or str(uuid.uuid4()),
+        "question": question,
+        "answer": response.text or "No answer was returned.",
+        "model": MODEL_NAME,
+    }
+
+
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edge-Cloud AI Research Assistant</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #0b1020;
+        color: #eef3ff;
+    }
+    .page {
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 28px 18px 60px;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 26px;
+    }
+    .header h1 {
+        font-size: 28px;
+        margin: 0 0 8px;
+    }
+    .header p {
+        color: #aeb9d4;
+        line-height: 1.5;
+        margin: 0;
+    }
+    .card {
+        background: #141b31;
+        border: 1px solid #293451;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 12px 35px rgba(0,0,0,.25);
+    }
+    #messages {
+        min-height: 300px;
+        max-height: 58vh;
+        overflow-y: auto;
+        margin-bottom: 16px;
+    }
+    .message {
+        padding: 12px 14px;
+        border-radius: 12px;
+        margin: 10px 0;
+        line-height: 1.55;
+        white-space: pre-wrap;
+    }
+    .user {
+        background: #223158;
+        margin-left: 12%;
+    }
+    .assistant {
+        background: #19243d;
+        border: 1px solid #2d3d62;
+        margin-right: 7%;
+    }
+    .label {
+        display: block;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: .08em;
+        color: #9fb5ed;
+        margin-bottom: 5px;
+    }
+    .input-row {
+        display: flex;
+        gap: 10px;
+    }
+    textarea {
+        flex: 1;
+        resize: none;
+        min-height: 58px;
+        border-radius: 10px;
+        border: 1px solid #3a496d;
+        background: #0e1528;
+        color: white;
+        padding: 12px;
+        font-size: 15px;
+        outline: none;
+    }
+    button {
+        width: 110px;
+        border: 0;
+        border-radius: 10px;
+        background: #e6edf9;
+        color: #111827;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    button:disabled {
+        opacity: .55;
+        cursor: wait;
+    }
+    .note {
+        font-size: 12px;
+        color: #8896b6;
+        text-align: center;
+        margin-top: 14px;
+    }
+    @media (max-width: 600px) {
+        .header h1 { font-size: 23px; }
+        .input-row { flex-direction: column; }
+        button { width: 100%; height: 46px; }
+        .user, .assistant { margin-left: 0; margin-right: 0; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="header">
+        <h1>Edge-Cloud AI Research Assistant</h1>
+        <p>
+            MSc Artificial Intelligence · AI-Driven Infrastructure Orchestration
+            for Edge-Cloud Environments
+        </p>
+    </div>
+
+    <div class="card">
+        <div id="messages">
+            <div class="message assistant">
+                <div style="text-align:center;margin-bottom:12px;"><img src="/robot.png" alt="AI Research Assistant Robot" style="width:100px;height:100px;object-fit:contain;"></div>
+                <span class="label">AI ASSISTANT</span>
+                Ask me about the system architecture, Edge/Cloud/Hybrid routing,
+                Rule-Based policy, Q-Learning, YOLOv8, Florence-2 or the project methodology.
+            </div>
+        </div>
+
+        <div class="input-row">
+            <textarea id="question" placeholder="Ask a question about the project..."></textarea>
+            <button id="send">Ask</button>
+        </div>
+
+        <div class="note">
+            Public academic demonstration · Live infrastructure telemetry is not exposed.
+        </div>
+    </div>
+</div>
+
+<script>
+const messages = document.getElementById("messages");
+const question = document.getElementById("question");
+const send = document.getElementById("send");
+let sessionId = null;
+
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function renderMarkdown(text) {
+    let html = escapeHtml(text);
+
+    html = html
+        .replaceAll(String.fromCharCode(92) + "*", "*").replaceAll(String.fromCharCode(92) + "_", "_").replaceAll(String.fromCharCode(92) + "`", "`")
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/^\s*\*\s+(.*)$/gm, "• $1")
+        .replace(/^\s*-\s+(.*)$/gm, "• $1")
+        .replace(/\\n/g, "<br>");
+
+    return html;
+}
+
+function addMessage(label, text, cssClass) {
+    const div = document.createElement("div");
+    div.className = "message " + cssClass;
+
+    const span = document.createElement("span");
+    span.className = "label";
+    span.textContent = label;
+
+    div.appendChild(span);
+
+    const content = document.createElement("div");
+
+    if (cssClass === "assistant") {
+        content.innerHTML = renderMarkdown(text);
+    } else {
+        content.textContent = text;
+    }
+
+    div.appendChild(content);
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+async function ask() {
+    const text = question.value.trim();
+    if (!text) return;
+
+    addMessage("YOU", text, "user");
+    question.value = "";
+    send.disabled = true;
+    send.textContent = "Thinking...";
+
+    try {
+        const response = await fetch("/api/ask", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                question: text,
+                session_id: sessionId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || "Request failed.");
+        }
+
+        sessionId = data.session_id;
+        addMessage("AI ASSISTANT", data.answer, "assistant");
+    } catch (error) {
+        addMessage("AI ASSISTANT", "Unable to answer: " + error.message, "assistant");
+    } finally {
+        send.disabled = false;
+        send.textContent = "Ask";
+        question.focus();
+    }
+}
+
+send.addEventListener("click", ask);
+
+question.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        ask();
+    }
+});
+</script>
+</body>
+</html>
+"""
+
+
+
+
+
+
+
+
