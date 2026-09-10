@@ -15,7 +15,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.1-flash-lite"
 @app.get("/robot.png", include_in_schema=False)
 async def robot_image():
     return FileResponse("robot.png")
@@ -276,6 +276,62 @@ async def home():
         text-align: center;
         margin-top: 14px;
     }
+    .brandline {
+        color: #4fd1ff;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+    .creator {
+        margin-top: 10px;
+        color: #c7d2ea;
+        font-size: 13px;
+    }
+    .creator strong {
+        color: #ffffff;
+    }
+    .topics-intro {
+        text-align: center;
+        color: #c7d2ea;
+        margin: 26px 0 15px;
+        font-size: 14px;
+    }
+    .topics-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 22px;
+    }
+    .topic-card {
+        min-height: 108px;
+        padding: 13px 10px;
+        border-radius: 12px;
+        border: 1px solid #2e4167;
+        background: linear-gradient(180deg, #17223c 0%, #111a30 100%);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    }
+    .topic-icon {
+        font-size: 21px;
+        margin-bottom: 7px;
+    }
+    .topic-title {
+        color: #67d8ff;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-bottom: 5px;
+    }
+    .topic-sub {
+        color: #9daac5;
+        font-size: 10px;
+        line-height: 1.3;
+    }
     @media (max-width: 600px) {
         .header h1 { font-size: 23px; }
         .input-row { flex-direction: column; }
@@ -287,11 +343,77 @@ async def home():
 <body>
 <div class="page">
     <div class="header">
+        <div class="brandline">University of Bedfordshire · UK</div>
         <h1>Edge-Cloud AI Research Assistant</h1>
-        <p>
-            MSc Artificial Intelligence · AI-Driven Infrastructure Orchestration
-            for Edge-Cloud Environments
-        </p>
+        <p>AI-Driven Infrastructure Orchestration for Edge-Cloud Environments</p>
+        <div class="creator">
+            <strong>Sophia Souza Marcal</strong> · MSc Artificial Intelligence · 2026<br>
+            School of Computer Science and Technology
+        </div>
+    </div>
+
+    <div class="topics-intro">Explore the topics below or type your question.</div>
+
+    <div class="topics-grid">
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">◆</div>
+            <div class="topic-title">System Architecture</div>
+            <div class="topic-sub">End-to-End Design</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">☁</div>
+            <div class="topic-title">Edge, Cloud & Hybrid</div>
+            <div class="topic-sub">Execution Routes</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">◉</div>
+            <div class="topic-title">Routing Policies</div>
+            <div class="topic-sub">Rule-Based · Q-Learning</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">◎</div>
+            <div class="topic-title">AI Models</div>
+            <div class="topic-sub">YOLOv8 · Florence-2</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">▣</div>
+            <div class="topic-title">Infrastructure & Machines</div>
+            <div class="topic-sub">Edge VM · AWS EC2</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">⚙</div>
+            <div class="topic-title">AWS Services</div>
+            <div class="topic-sub">Greengrass · S3 · Session Manager</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">&lt;/&gt;</div>
+            <div class="topic-title">Implementation</div>
+            <div class="topic-sub">React · FastAPI · Python</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">▥</div>
+            <div class="topic-title">Evaluation & Results</div>
+            <div class="topic-sub">Latency · CPU · Memory · RTT</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">◇</div>
+            <div class="topic-title">Project Methodology</div>
+            <div class="topic-sub">Design · Development · Testing</div>
+        </div>
+
+        <div class="topic-card" onclick="selectTopic(this)">
+            <div class="topic-icon">▤</div>
+            <div class="topic-title">Research & Conclusions</div>
+            <div class="topic-sub">Questions · Findings · Future Work</div>
+        </div>
     </div>
 
     <div class="card">
@@ -367,6 +489,25 @@ function addMessage(label, text, cssClass) {
     messages.scrollTop = messages.scrollHeight;
 }
 
+function selectTopic(card) {
+    const title = card.querySelector(".topic-title")?.textContent.trim() || "";
+    const prompts = {
+        "System Architecture": "Explain the system architecture of this project.",
+        "Edge, Cloud & Hybrid": "Explain how Edge, Cloud and Hybrid execution work in this project.",
+        "Routing Policies": "Explain the Rule-Based and Q-Learning routing policies used in this project.",
+        "AI Models": "Explain the role of YOLOv8 and Florence-2 in this project.",
+        "Infrastructure & Machines": "Explain the Edge VM and AWS EC2 infrastructure used in this project.",
+        "AWS Services": "Explain the AWS services used in this project, including Greengrass, S3 and Session Manager.",
+        "Implementation": "Explain how the system was implemented using React, FastAPI and Python.",
+        "Evaluation & Results": "Explain how the project was evaluated and which performance metrics were used.",
+        "Project Methodology": "Explain the project methodology, including design, development and testing.",
+        "Research & Conclusions": "Summarise the research questions, findings, conclusions and future work of this project."
+    };
+    if (prompts[title]) {
+        question.value = prompts[title];
+        question.focus();
+    }
+}
 async function ask() {
     const text = question.value.trim();
     if (!text) return;
@@ -415,6 +556,9 @@ question.addEventListener("keydown", function(event) {
 </body>
 </html>
 """
+
+
+
 
 
 
