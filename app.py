@@ -154,7 +154,8 @@ Answer using only the project context above.
             model=MODEL_NAME,
             contents=prompt,
         )
-    except Exception:
+    except Exception as e:
+        print(f"Gemini error: {type(e).__name__}: {e}", flush=True)
         raise HTTPException(
             status_code=502,
             detail="The AI service is temporarily unavailable.",
