@@ -354,6 +354,33 @@ async def home():
     textarea { width: 100%; box-sizing: border-box; }
     button { width: 100%; height: 46px; }
 }
+@media (max-width: 600px) {
+    .topics-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 5px;
+        width: 100%;
+    }
+    .topic-card {
+        min-width: 0;
+        min-height: 112px;
+        padding: 8px 3px;
+        border-radius: 10px;
+    }
+    .topic-icon {
+        font-size: 17px;
+        margin-bottom: 6px;
+    }
+    .topic-title {
+        font-size: 10px;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+    }
+    .topic-sub {
+        font-size: 8px;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+}
 </style>
 </head>
 <body>
@@ -572,6 +599,7 @@ question.addEventListener("keydown", function(event) {
 </body>
 </html>
 """
+
 
 
 
