@@ -34,11 +34,14 @@ Architecture:
 - React dashboard/frontend.
 - Python FastAPI orchestration backend.
 - Edge node: Ubuntu Linux virtual machine running through Oracle VirtualBox.
-- AWS IoT Greengrass is used for Edge deployment.
-- Cloud node: Amazon EC2.
+- AWS IoT Greengrass is used to deploy and manage the Edge inference component on the Ubuntu Edge node. It does not imply that every AI workload executes at the Edge.
+- Amazon S3 was used to store the Greengrass component artefact used for Edge deployment.
+- AWS Systems Manager Session Manager was used to access and administer the Amazon EC2 cloud node without exposing direct remote access credentials.
+- Cloud node: Amazon EC2. Amazon EC2 hosts the Cloud node and provides the environment for cloud-side AI workload execution. Do not state that the central orchestration backend is hosted on EC2; the main orchestration backend runs in the local development/control environment.
 - Execution routes: Edge, Cloud and Hybrid.
 - Final orchestration policies: Rule-Based and Q-Learning.
-- AI workloads: YOLOv8 and Florence-2.
+- AI workloads: YOLOv8 and Florence-2. YOLOv8 represents the object-detection workload. Florence-2 represents the semantic vision-language interpretation workload.
+- In the Cooperative Hybrid execution path, YOLOv8 executes at the Edge and Florence-2 executes in the Cloud. Do not state or imply that Florence-2 executes on the Edge in this Hybrid pipeline.
 - Gemini is used only as the Research Assistant interface and is not a routing policy.
 
 Rule-Based policy:
@@ -99,6 +102,13 @@ Experimental interpretation:
   available in the original experimental environment but not exposed
   through this public demonstration.
 
+Academic accuracy rules:
+- Describe the Rule-Based policy as deterministic threshold-based routing logic. Do not call it a Decision Tree, decision-tree model, classifier, or learned machine-learning policy.
+- Do not invent, reconstruct or infer exact research questions, findings, conclusions, limitations, future-work items, experimental results, numerical values or comparative performance claims unless they are explicitly included in this public project context or supplied by the user.
+- If exact research questions, findings, conclusions or future work are not present in this public context, state that the exact information is not available in the public demonstration context rather than fabricating it.
+- Do not claim that Q-Learning outperforms, is superior to, or represents an improvement over Rule-Based unless explicit measured evidence is provided.
+- Do not invent power-consumption metrics, energy evaluation, multi-node Edge clusters, scalability experiments or other future-work items not explicitly provided.
+- Distinguish implemented architecture and system design from measured experimental findings.
 STRICT RULES
 1. Do not invent experimental numbers, measurements or results.
 2. Do not claim that Decision Tree or Random Forest are final orchestration policies.
@@ -212,7 +222,7 @@ async def home():
         box-shadow: 0 12px 35px rgba(0,0,0,.25);
     }
     #messages {
-        min-height: 300px;
+        min-height: 0;
         max-height: 58vh;
         overflow-y: auto;
         margin-bottom: 16px;
@@ -381,6 +391,42 @@ async def home():
         overflow-wrap: anywhere;
     }
 }
+    .assistant-panel {
+        padding: 20px;
+    }
+    .assistant-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 2px 2px 16px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #293451;
+    }
+    .assistant-avatar {
+        width: 58px;
+        height: 58px;
+        object-fit: contain;
+        flex: 0 0 auto;
+    }
+    .assistant-identity .label {
+        margin-bottom: 4px;
+        font-size: 11px;
+        letter-spacing: .12em;
+    }
+    .assistant-subtitle {
+        color: #aeb9d4;
+        font-size: 13px;
+        letter-spacing: .02em;
+    }
+    .assistant-panel #messages {
+        min-height: 0;
+        max-height: none;
+        overflow: visible;
+        margin: 14px 0 0;
+    }
+    .assistant-panel .note {
+        margin-top: 14px;
+    }
 </style>
 </head>
 <body>
@@ -459,13 +505,12 @@ async def home():
         </div>
     </div>
 
-    <div class="card">
-        <div id="messages">
-            <div class="message assistant">
-                <div style="text-align:center;margin-bottom:12px;"><img src="/robot.png" alt="AI Research Assistant Robot" style="width:100px;height:100px;object-fit:contain;"></div>
+    <div class="card assistant-panel">
+        <div class="assistant-brand">
+            <img src="/robot.png" alt="AI Research Assistant Robot" class="assistant-avatar">
+            <div class="assistant-identity">
                 <span class="label">AI ASSISTANT</span>
-                Ask me about the system architecture, Edge/Cloud/Hybrid routing,
-                Rule-Based policy, Q-Learning, YOLOv8, Florence-2 or the project methodology.
+                <div class="assistant-subtitle">Project Knowledge Interface</div>
             </div>
         </div>
 
@@ -473,6 +518,8 @@ async def home():
             <textarea id="question" placeholder="Ask a question about the project..."></textarea>
             <button id="send">Ask</button>
         </div>
+
+        <div id="messages"></div>
 
         <div class="note">
             Public academic demonstration · Live infrastructure telemetry is not exposed.
@@ -599,6 +646,14 @@ question.addEventListener("keydown", function(event) {
 </body>
 </html>
 """
+
+
+
+
+
+
+
+
 
 
 
