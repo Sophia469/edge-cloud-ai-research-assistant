@@ -350,12 +350,14 @@ async def home():
     }
 @media (max-width: 600px) {
     .page { max-width: 100%; padding: 22px 14px 42px; }
-    .header { margin-bottom: 20px; padding: 0 8px; }
-    .brandline { font-size: 11px; letter-spacing: .10em; margin-bottom: 12px; }
-    .header h1 { font-size: 27px; line-height: 1.15; margin-bottom: 12px; }
-    .header p { font-size: 15px; line-height: 1.45; margin: 0 auto; max-width: 92%; }
-    .creator { margin-top: 14px; font-size: 13px; line-height: 1.45; }
-    .topics-intro { margin: 24px 0 16px; font-size: 14px; }
+    .header { margin-bottom: 16px; padding: 0 8px; }
+    .brandline { font-size: 10px; letter-spacing: .12em; margin-bottom: 9px; }
+    .header h1 { font-size: 25px; line-height: 1.12; margin-bottom: 9px; }
+    .header p { font-size: 13px; line-height: 1.4; margin: 0 auto; max-width: 94%; }
+    .creator { margin-top: 11px; font-size: 12px; line-height: 1.5; }
+    .creator strong { display: block; font-size: 13px; margin-bottom: 1px; }
+    .creator-sep { display: none; }
+    .topics-intro { margin: 18px 0 14px; font-size: 13px; }
     .card { padding: 12px; border-radius: 14px; }
     #messages { min-height: 0; max-height: none; overflow-y: visible; margin-bottom: 14px; }
     .message { width: 100%; box-sizing: border-box; padding: 14px; line-height: 1.55; }
@@ -381,9 +383,11 @@ async def home():
         margin-bottom: 6px;
     }
     .topic-title {
-        font-size: 10px;
+        font-size: 9px;
         line-height: 1.15;
-        overflow-wrap: anywhere;
+        overflow-wrap: normal;
+        word-break: normal;
+        hyphens: none;
     }
     .topic-sub {
         font-size: 8px;
@@ -436,12 +440,12 @@ async def home():
         <h1>Edge-Cloud AI Research Assistant</h1>
         <p>AI-Driven Infrastructure Orchestration for Edge-Cloud Environments</p>
         <div class="creator">
-            <strong>Sophia Souza Marcal</strong> · MSc Artificial Intelligence · 2026<br>
+            <strong>Sophia Souza Marcal</strong><span class="creator-sep"> · </span>MSc Artificial Intelligence · 2026<br>
             School of Computer Science and Technology
         </div>
     </div>
 
-    <div class="topics-intro">Explore the topics below or type your question.</div>
+    <div class="topics-intro">Explore the topics below or type your question:</div>
 
     <div class="topics-grid">
         <div class="topic-card" onclick="selectTopic(this)">
@@ -586,7 +590,7 @@ function selectTopic(card) {
         "Edge, Cloud & Hybrid": "Explain how Edge, Cloud and Hybrid execution work in this project.",
         "Routing Policies": "Explain the Rule-Based and Q-Learning routing policies used in this project.",
         "AI Models": "Explain the role of YOLOv8 and Florence-2 in this project.",
-        "Infrastructure & Machines": "Explain the Edge VM and AWS EC2 infrastructure used in this project.",
+        "Infrastructure & Machines": "Explain the Edge VM and AWS EC2 infrastructure.",
         "AWS Services": "Explain the AWS services used in this project, including Greengrass, S3 and Session Manager.",
         "Implementation": "Explain how the system was implemented using React, FastAPI and Python.",
         "Evaluation & Results": "Explain how the project was evaluated and which performance metrics were used.",
@@ -646,6 +650,14 @@ question.addEventListener("keydown", function(event) {
 </body>
 </html>
 """
+
+
+
+
+
+
+
+
 
 
 
